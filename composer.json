@@ -1,0 +1,43 @@
+{
+    "name": "isaeken/strargs",
+    "version": "1.0.0",
+    "description": "",
+    "license": "MIT",
+    "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "homepage": "https://github.com/isaeken/strargs",
+    "readme": "README.md",
+    "authors": [
+        {
+            "name": "Isa Eken",
+            "email": "hello@isaeken.com.tr",
+            "homepage": "https://www.isaeken.com.tr",
+            "role": "Founder"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "illuminate/support": "^8.47",
+        "symfony/var-dumper": "^5.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "IsaEken\\Strargs\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "IsaEken\\Strargs\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    }
+}
