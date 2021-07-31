@@ -44,7 +44,7 @@ trait HasOptions
     /**
      * @inheritDoc
      */
-    public function getOption(string $name): string|bool|int|float|null
+    public function getOption(string $name): string|bool|int|float|array|null
     {
         if ($this->hasOption($name)) {
             return $this->getOptions()[mb_strtolower($name)];
@@ -56,7 +56,7 @@ trait HasOptions
     /**
      * @inheritDoc
      */
-    public function setOption(string $name, string|bool|int|float|null $value): self
+    public function setOption(string $name, string|bool|int|float|array|null $value): self
     {
         $this->options[mb_strtolower($name)] = $value;
         return $this;
@@ -87,6 +87,22 @@ trait HasOptions
             $options[mb_strtolower($key)] = Helpers::stringToValue($value);
         }
 
+        $array_options = [];
+        preg_match_all("/--(.[a-z0-9]+)\\[\\]=(([\"'])(.*?[^\\\\])\\3|([a-zA-Z0-9\\.]+))/", $this->getString(), $array_options_array);
+        foreach ($array_options_array[1] as $index => $key) {
+            $value = Helpers::stringToValue($array_options_array[2][$index]);
+
+            if (!array_key_exists($key, $array_options)) {
+                $array_options[$key] = [];
+            }
+
+            $array_options[$key][] = $value;
+        }
+
+        foreach ($array_options as $name => $array) {
+            $options[$name] = $array;
+        }
+
         return $this->setOptions($options);
     }
 
@@ -97,7 +113,14 @@ trait HasOptions
     {
         $options = '';
         foreach ($this->getOptions() as $key => $value) {
-            $options .= '--' . $key . '=' . Helpers::valueToString($value) . ' ';
+            if (is_array($value)) {
+                foreach ($value as $item) {
+                    $options .= '--' . $key . '[]=' . Helpers::valueToString($item) . ' ';
+                }
+            }
+            else {
+                $options .= '--' . $key . '=' . Helpers::valueToString($value) . ' ';
+            }
         }
 
         return mb_strlen($options) > 0 ? mb_substr($options, 0, -1) : '';

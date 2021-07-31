@@ -88,6 +88,6 @@ class Strargs implements HasCommand, HasFlags, HasArguments, HasOptions, HasVerb
             $string .= ' ' . $verbose;
         }
 
-        return $this->string = Str::of(trim($string))->__toString();
+        return $this->setString(trim($string))->getString();
     }
 }

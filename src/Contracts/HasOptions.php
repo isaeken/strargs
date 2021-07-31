@@ -33,18 +33,18 @@ interface HasOptions
      * Get the specific option.
      *
      * @param string $name
-     * @return string|bool|int|float|null
+     * @return string|bool|int|float|array|null
      */
-    public function getOption(string $name): string|bool|int|float|null;
+    public function getOption(string $name): string|bool|int|float|array|null;
 
     /**
      * Set the specific option.
      *
      * @param string $name
-     * @param string|bool|int|float|null $value
+     * @param string|bool|int|float|array|null $value
      * @return self
      */
-    public function setOption(string $name, string|bool|int|float|null $value): self;
+    public function setOption(string $name, string|bool|int|float|array|null $value): self;
 
     /**
      * Remove the specific option.
