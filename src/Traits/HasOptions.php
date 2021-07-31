@@ -44,7 +44,7 @@ trait HasOptions
     /**
      * @inheritDoc
      */
-    public function getOption(string $name): string|bool|int|float|array|null
+    public function getOption(string $name): string|bool|int|float|object|array|null
     {
         if ($this->hasOption($name)) {
             return $this->getOptions()[mb_strtolower($name)];
@@ -56,7 +56,7 @@ trait HasOptions
     /**
      * @inheritDoc
      */
-    public function setOption(string $name, string|bool|int|float|array|null $value): self
+    public function setOption(string $name, string|bool|int|float|object|array|null $value): self
     {
         $this->options[mb_strtolower($name)] = $value;
         return $this;
