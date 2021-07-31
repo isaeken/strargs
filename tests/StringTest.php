@@ -2,6 +2,7 @@
 
 namespace IsaEken\Strargs\Tests;
 
+use IsaEken\Strargs\Enums\VerboseLevel;
 use IsaEken\Strargs\Strargs;
 use PHPUnit\Framework\TestCase;
 
@@ -25,122 +26,104 @@ class StringTest extends TestCase
         $this->assertEquals('command', $strargs->getCommand());
     }
 
-    public function testOptions()
-    {
-        $strargs = (new Strargs('command -a -b'))->decode();
-
-        $this->assertEquals($strargs->getOptions(), ['a', 'b']);
-
-        $this->assertTrue($strargs->hasOption('a'));
-        $this->assertFalse($strargs->hasOption('c'));
-
-        $strargs->addOption('c');
-        $this->assertTrue($strargs->hasOption('c'));
-
-        $strargs->removeOption('c');
-        $this->assertFalse($strargs->hasOption('c'));
-    }
-
-    public function testShortEnableDisable()
-    {
-        $strargs = new Strargs;
-        $this->assertFalse($strargs->short);
-        $strargs->enableShort();
-        $this->assertTrue($strargs->short);
-        $strargs->disableShort();
-        $this->assertFalse($strargs->isShort());
-        $strargs->setShort(true);
-        $this->assertTrue($strargs->isShort());
-    }
-
     public function testArguments()
     {
-        $strargs = (new Strargs('command --null=null --boolean1=true --boolean2=false --int1=4 --int2=0 --float=1.4 --string1=text --string2="this is a text"'))->decode();
+        $strargs = (new Strargs('command argument1 argument2'))->decode();
 
-        $this->assertTrue($strargs->hasArgument('null'));
-        $this->assertTrue($strargs->hasArgument('boolean1'));
-        $this->assertTrue($strargs->hasArgument('string1'));
-        $this->assertFalse($strargs->hasArgument('string3'));
-
-        $strargs->setArgument('string3', 'testing');
-        $this->assertTrue($strargs->hasArgument('string3'));
-        $this->assertEquals('testing', $strargs->getArgument('string3'));
-
-        $this->assertIsArray($strargs->getArguments());
-
-        $strargs->removeArgument('string3');
-        $this->assertFalse($strargs->hasArgument('string3'));
-
-        $strargs->string3 = 'string3';
-        $this->assertTrue($strargs->hasArgument('string3'));
-        $this->assertEquals('string3', $strargs->string3);
-
-        $this->assertEquals(null, $strargs->getArgument('null'));
-        $this->assertEquals(true, $strargs->getArgument('boolean1'));
-        $this->assertEquals(false, $strargs->getArgument('boolean2'));
-        $this->assertEquals(4, $strargs->getArgument('int1'));
-        $this->assertEquals(0, $strargs->getArgument('int2'));
-        $this->assertEquals(1.4, $strargs->getArgument('float'));
-        $this->assertEquals('text', $strargs->getArgument('string1'));
-        $this->assertEquals('this is a text', $strargs->getArgument('string2'));
-    }
-
-    public function testShort()
-    {
-        $strargs = (new Strargs('command null true false 1 2 3.3 4.4 text "this is a text" -a -b'))->enableShort()->decode();
+        $this->assertEquals(['argument1', 'argument2'], $strargs->getArguments());
 
         $this->assertTrue($strargs->hasArgument(0));
-        $this->assertTrue($strargs->hasArgument(8));
-        $this->assertFalse($strargs->hasArgument(9));
+        $this->assertFalse($strargs->hasArgument(2));
 
-        $this->assertTrue($strargs->hasOption('a'));
-        $this->assertTrue($strargs->hasOption('b'));
-        $this->assertFalse($strargs->hasOption('c'));
+        $strargs->setArgument(2, 'argument3');
+        $this->assertTrue($strargs->hasArgument(2));
 
-        $this->assertEquals(null, $strargs->getArgument(0));
-        $this->assertEquals(true, $strargs->getArgument(1));
-        $this->assertEquals(false, $strargs->getArgument(2));
-        $this->assertEquals(1, $strargs->getArgument(3));
-        $this->assertEquals(2, $strargs->getArgument(4));
-        $this->assertEquals(3.3, $strargs->getArgument(5));
-        $this->assertEquals(4.4, $strargs->getArgument(6));
-        $this->assertEquals('text', $strargs->getArgument(7));
-        $this->assertEquals('this is a text', $strargs->getArgument(8));
+        $this->assertEquals('argument3', $strargs->getArgument(2));
+        $strargs->removeArgument(2);
+
+        $this->assertFalse($strargs->hasArgument(2));
+
+        $strargs
+            ->setArgument(2, 'string')
+            ->setArgument(3, 4)
+            ->setArgument(4, 4.4)
+            ->setArgument(5, true)
+            ->setArgument(6, false)
+            ->setArgument(7, [1, 2])
+            ->setArgument(8, (object) ['key' => 'value'])
+            ->setArgument(9, null)
+            ->setString('command ' . $strargs->encodeArguments());
+
+        $strargs->decodeArguments();
+
+        $this->assertEquals('string', $strargs->getArgument(2));
+        $this->assertEquals(4, $strargs->getArgument(3));
+        $this->assertEquals(4.4, $strargs->getArgument(4));
+        $this->assertEquals(true, $strargs->getArgument(5));
+        $this->assertEquals(false, $strargs->getArgument(6));
+        $this->assertEquals([1, 2], $strargs->getArgument(7));
+        $this->assertEquals($strargs->getArgument(8), (object) ['key' => 'value']);
+        $this->assertEquals(null, $strargs->getArgument(9));
     }
 
-    public function testEncode()
+    public function testOptions()
     {
-        $command = 'command --boolean1=true --boolean2=false --integer1=0 --integer2=4 --float=2.2 --string="text" -a -b';
-        $commandShort = 'command true false 0 4 2.2 "text" "this is a text" -a -b';
+        $text = '--null=null --bool1=true --bool2=false --int=1 --float=2.2 --string1=string --string2="second string" --array="[1,2]" --json="{\"key\":\"value\"}" --arr[]="first" --arr[]="second"';
+        $strargs = (new Strargs('command ' . $text))->decode();
 
-        $strargs = new Strargs;
-        $strargs
-            ->setCommand('command')
-            ->addOption('a')
-            ->addOption('b')
-            ->setArgument('boolean1', true)
-            ->setArgument('boolean2', false)
-            ->setArgument('integer1', 0)
-            ->setArgument('integer2', 4)
-            ->setArgument('float', 2.2)
-            ->setArgument('string', 'text')
-        ;
-        $this->assertEquals($strargs->encode(), $command);
+        $this->assertTrue($strargs->hasOption('null'));
+        $this->assertFalse($strargs->hasOption('null2'));
 
-        $strargs = new Strargs;
-        $strargs
-            ->enableShort()
-            ->setCommand('command')
-            ->addOption('a')
-            ->addOption('b')
-            ->setArgument(0, true)
-            ->setArgument(1, false)
-            ->setArgument(2, 0)
-            ->setArgument(3, 4)
-            ->setArgument(4, 2.2)
-            ->setArgument(5, 'text')
-            ->setArgument(6, 'this is a text')
-        ;
-        $this->assertEquals($strargs->encode(), $commandShort);
+        $strargs->setOption('null2', null);
+        $this->assertTrue($strargs->hasOption('null2'));
+
+        $strargs->removeOption('null2');
+        $this->assertFalse($strargs->hasOption('null2'));
+
+        $this->assertEquals(null, $strargs->getOption('null'));
+        $this->assertEquals(true, $strargs->getOption('bool1'));
+        $this->assertEquals(false, $strargs->getOption('bool2'));
+        $this->assertEquals(1, $strargs->getOption('int'));
+        $this->assertEquals(2.2, $strargs->getOption('float'));
+        $this->assertEquals('string', $strargs->getOption('string1'));
+        $this->assertEquals('second string', $strargs->getOption('string2'));
+        $this->assertEquals([1, 2], $strargs->getOption('array'));
+        $this->assertEquals((object) ['key' => 'value'], $strargs->getOption('json'));
+        $this->assertEquals(['first', 'second'], $strargs->getOption('arr'));
+        $this->assertEquals('--null=null --bool1=true --bool2=false --int=1 --float=2.2 --string1="string" --string2="second string" --array[]=1 --array[]=2 --json="{\"key\":\"value\"}" --arr[]="first" --arr[]="second"', $strargs->encodeOptions());
+    }
+
+    public function testVerbose()
+    {
+        $this->assertEquals(VerboseLevel::NORMAL, (new Strargs('command'))->decode()->getVerbose());
+        $this->assertEquals(VerboseLevel::QUIET, (new Strargs('command -q'))->decode()->getVerbose());
+        $this->assertEquals(VerboseLevel::QUIET, (new Strargs('command --quiet'))->decode()->getVerbose());
+        $this->assertEquals(VerboseLevel::VERBOSE, (new Strargs('command -v'))->decode()->getVerbose());
+        $this->assertEquals(VerboseLevel::VERY_VERBOSE, (new Strargs('command -vv'))->decode()->getVerbose());
+        $this->assertEquals(VerboseLevel::DEBUG, (new Strargs('command -vvv'))->decode()->getVerbose());
+    }
+
+    public function testFlags()
+    {
+        $strargs = new Strargs('command -a -b -c --abc');
+        $strargs->decode();
+
+        $this->assertTrue($strargs->hasFlag('a'));
+        $this->assertTrue($strargs->hasFlag('b'));
+        $this->assertTrue($strargs->hasFlag('c'));
+
+        $strargs->removeFlag('c');
+        $this->assertFalse($strargs->hasFlag('c'));
+
+        $strargs->addFlag('c');
+        $this->assertTrue($strargs->hasFlag('c'));
+
+        $this->assertTrue($strargs->hasFlag('abc'));
+        $strargs->removeFlag('abc');
+        $this->assertFalse($strargs->hasFlag('abc'));
+        $strargs->addFlag('abc');
+        $this->assertTrue($strargs->hasFlag('abc'));
+
+        $this->assertEquals('-a -b -c --abc', $strargs->encodeFlags());
     }
 }

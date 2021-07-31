@@ -45,7 +45,7 @@ trait HasArguments
     /**
      * @inheritDoc
      */
-    public function getArgument(string $name): string|bool|int|float|null
+    public function getArgument(string $name): string|bool|int|float|object|array|null
     {
         if ($this->hasArgument($name)) {
             return $this->getArguments()[mb_strtolower($name)];
@@ -57,7 +57,7 @@ trait HasArguments
     /**
      * @inheritDoc
      */
-    public function setArgument(string $name, string|bool|int|float|null $value): self
+    public function setArgument(string $name, string|bool|int|float|object|array|null $value): self
     {
         $this->arguments[mb_strtolower($name)] = $value;
         return $this;

@@ -33,18 +33,18 @@ interface HasArguments
      * Get the specific argument.
      *
      * @param string $name
-     * @return string|bool|int|float|null
+     * @return string|bool|int|float|object|array|null
      */
-    public function getArgument(string $name): string|bool|int|float|null;
+    public function getArgument(string $name): string|bool|int|float|object|array|null;
 
     /**
      * Set the specific argument.
      *
      * @param string $name
-     * @param string|bool|int|float|null $value
+     * @param string|bool|int|float|object|array|null $value
      * @return self
      */
-    public function setArgument(string $name, string|bool|int|float|null $value): self;
+    public function setArgument(string $name, string|bool|int|float|object|array|null $value): self;
 
     /**
      * Remove the specific argument.
