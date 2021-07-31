@@ -1,7 +1,7 @@
 {
     "name": "isaeken/strargs",
-    "version": "2.0.0",
-    "description": "",
+    "version": "2.4.0",
+    "description": "Advanced CLI Command Parser",
     "license": "MIT",
     "type": "library",
     "minimum-stability": "dev",
